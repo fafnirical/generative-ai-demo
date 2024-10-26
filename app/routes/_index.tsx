@@ -1,7 +1,7 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod';
 import type { ActionFunctionArgs } from '@remix-run/node';
-import { Form, json, useActionData } from '@remix-run/react';
+import { Form, json, redirect, useActionData } from '@remix-run/react';
 import { z } from 'zod';
 import { Field } from '../components/forms';
 import { Button } from '../components/ui/button';
@@ -31,7 +31,9 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  return null;
+  const { zipCode } = submission.value;
+
+  return redirect(`/weather/${zipCode}`);
 }
 
 export default function Index() {
