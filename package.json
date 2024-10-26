@@ -3,6 +3,9 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "imports": {
+    "#app/*": "./app/*"
+  },
   "scripts": {
     "build": "remix vite:build",
     "dev": "remix vite:dev",
