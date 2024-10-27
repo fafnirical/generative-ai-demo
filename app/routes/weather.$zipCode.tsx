@@ -1,13 +1,15 @@
 import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { zip } from '../.server/tools/open-weather-map/geocoding-api';
+import { currentWeather } from '../.server/tools/open-weather-map/weather-api';
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const zipCode = params.zipCode!;
 
   const geolocation = await zip({ zipCode, countryCode: 'us' });
+  const weather = await currentWeather(geolocation);
 
-  return json(geolocation);
+  return json(weather);
 }
 
 export default function Weather() {
