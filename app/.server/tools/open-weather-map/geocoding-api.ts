@@ -1,25 +1,30 @@
-interface ZipRequest {
+import { z } from 'zod';
+
+export const zipRequestSchema = z.object({
   /** Zip/post code */
-  zipCode: string;
+  zipCode: z.coerce.string(),
   /** Country code. Please use ISO 3166 country codes. */
-  countryCode: string;
-}
-interface ZipResponse {
+  countryCode: z.string(),
+});
+type ZipRequest = z.infer<typeof zipRequestSchema>;
+
+export const zipResponseSchema = z.object({
   /** Specified zip/post code in the API request */
-  zip: string;
+  zip: z.string(),
   /** Name of the found area */
-  name: string;
+  name: z.string(),
   /** Geographical coordinates of the centroid of found zip/post code (latitude) */
-  lat: number;
+  lat: z.number(),
   /** Geographical coordinates of the centroid of found zip/post code (longitude) */
-  lon: number;
+  lon: z.number(),
   /** Country of the found zip/post code */
-  country: string;
-}
-export function zip({
-  zipCode,
-  countryCode,
-}: ZipRequest): Promise<ZipResponse> {
+  country: z.string(),
+});
+type ZipResponse = z.infer<typeof zipResponseSchema>;
+
+export async function zip(request: ZipRequest): Promise<ZipResponse> {
+  const { zipCode, countryCode } = await zipRequestSchema.parseAsync(request);
+
   const apiKey = process.env.OPEN_WEATHER_MAP_API_KEY as string;
 
   const url = new URL('https://api.openweathermap.org/geo/1.0/zip');
@@ -28,10 +33,9 @@ export function zip({
     appid: apiKey,
   }).toString();
 
-  return fetch(url).then((response) => {
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
-    return response.json();
-  });
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  return zipResponseSchema.parseAsync(await response.json());
 }
